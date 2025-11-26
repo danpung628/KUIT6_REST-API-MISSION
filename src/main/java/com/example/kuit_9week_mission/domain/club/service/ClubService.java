@@ -1,8 +1,14 @@
 package com.example.kuit_9week_mission.domain.club.service;
 
+import com.example.kuit_9week_mission.domain.club.dto.response.ClubListResponse;
+import com.example.kuit_9week_mission.domain.club.dto.response.ClubSimpleResponse;
+import com.example.kuit_9week_mission.domain.club.model.Club;
+import com.example.kuit_9week_mission.domain.club.model.ClubStatus;
 import com.example.kuit_9week_mission.domain.club.repository.ClubRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -11,26 +17,25 @@ public class ClubService {
     private final ClubRepository clubRepository;
 
     // TODO 1: 동아리 목록 조회 기능 구현(토큰 불필요) - GET (무한 스크롤 - 각 페이지당 5개의 데이터를 보여줄 것 & status 기반 필터링)
-    /**
-     * 응답 DTO 구조는 아래와 같은 형태를 따를 것
-     * {
-     *   "isSuccess": true,
-     *   "statusCode": 20000,
-     *   "message": "요청에 성공했습니다",
-     *   "data": {
-     *       "data": [
-     *           {
-     *               "clubId": 4,
-     *               "name": "동아리 4",
-     *               "description": "동아리 4 설명"
-     *           }
-     *       ],
-     *       "lastId": 100,
-     *       "hasNext": true
-     *   },
-     *   "timestamp": "2025-10-24T00:37:07.469931"
-     * }
-     */
+    private static final int PAGE_SIZE = 5;
+
+    public ClubListResponse getClubList(Long lastId, ClubStatus status) {
+        // 실제로는 PAGE_SIZE + 1개를 조회해서 hasNext를 판단
+        List<Club> clubs = clubRepository.findClubsWithCursor(lastId, status, PAGE_SIZE + 1);
+
+        boolean hasNext = clubs.size() > PAGE_SIZE;
+
+        // 실제 반환할 데이터는 PAGE_SIZE만큼만
+        List<ClubSimpleResponse> data = clubs.stream()
+                .limit(PAGE_SIZE)
+                .map(ClubSimpleResponse::from)
+                .toList();
+
+        // lastId는 현재 페이지의 마지막 데이터의 clubId
+        Long newLastId = data.isEmpty() ? null : data.get(data.size() - 1).clubId();
+
+        return ClubListResponse.of(data, newLastId, hasNext);
+    }
 
     // TODO 2: 동아리 정보 수정 기능 구현(토큰 불필요) - PUT
 
