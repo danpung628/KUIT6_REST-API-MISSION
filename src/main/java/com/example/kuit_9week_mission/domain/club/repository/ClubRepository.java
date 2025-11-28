@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
@@ -46,6 +47,24 @@ public class ClubRepository {
                 return jdbc.query(sql, MAPPER, lastId, limit);
             }
         }
+    }
+
+    // 동아리 정보 수정
+    public int updateClub(Long clubId, String name, String description) {
+        String sql = "UPDATE Clubs SET name = ?, description = ? WHERE club_id = ?";
+        return jdbc.update(sql, name, description, clubId);
+    }
+
+    // 동아리 삭제
+    public int deleteClub(Long clubId) {
+        String sql = "DELETE FROM Clubs WHERE club_id = ?";
+        return jdbc.update(sql, clubId);
+    }
+
+    // 동아리 ID로 조회
+    public Optional<Club> findById(Long clubId) {
+        String sql = "SELECT club_id, name, description, status FROM Clubs WHERE club_id = ?";
+        return jdbc.query(sql, MAPPER, clubId).stream().findFirst();
     }
 
 }

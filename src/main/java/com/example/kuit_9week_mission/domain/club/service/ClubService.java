@@ -1,10 +1,13 @@
 package com.example.kuit_9week_mission.domain.club.service;
 
+import com.example.kuit_9week_mission.domain.club.dto.request.UpdateClubRequest;
 import com.example.kuit_9week_mission.domain.club.dto.response.ClubListResponse;
 import com.example.kuit_9week_mission.domain.club.dto.response.ClubSimpleResponse;
 import com.example.kuit_9week_mission.domain.club.model.Club;
 import com.example.kuit_9week_mission.domain.club.model.ClubStatus;
 import com.example.kuit_9week_mission.domain.club.repository.ClubRepository;
+import com.example.kuit_9week_mission.global.common.exception.CustomException;
+import com.example.kuit_9week_mission.global.common.response.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -38,6 +41,20 @@ public class ClubService {
     }
 
     // TODO 2: 동아리 정보 수정 기능 구현(토큰 불필요) - PUT
+    public void updateClub(Long clubId, UpdateClubRequest request) {
+        int updated = clubRepository.updateClub(clubId, request.name(), request.description());
+
+        if (updated == 0) {
+            throw new CustomException(ErrorCode.NOT_FOUND, new IllegalArgumentException("해당 동아리가 존재하지 않습니다."));
+        }
+    }
 
     // TODO 3: 동아리 삭제 기능 구현(토큰 불필요) - DELETE
+    public void deleteClub(Long clubId) {
+        int deleted = clubRepository.deleteClub(clubId);
+
+        if (deleted == 0) {
+            throw new CustomException(ErrorCode.NOT_FOUND, new IllegalArgumentException("해당 동아리가 존재하지 않습니다."));
+        }
+    }
 }
